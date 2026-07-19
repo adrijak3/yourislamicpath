@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { GuidedPathNav } from "@/components/GuidedPathNav";
 import { PrayerTimesCard } from "@/components/PrayerTimesCard";
+import { MosqueHero } from "@/components/MosqueHero";
+import { LearningPathGrid } from "@/components/LearningPathGrid";
 import { SALAH_LESSONS } from "@/lib/salah-course";
 import { pickTodayReminder, type Reminder } from "@/lib/daily-reminders";
-import { MosqueHero } from "@/components/MosqueHero";
 import {
   usePracticeCount,
   useSalahProgress,
@@ -14,86 +15,111 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Guided Path — A gentle path for new Muslims" },
+      {
+        title: "Guided Path — A gentle path for new Muslims",
+      },
       {
         name: "description",
         content:
-          "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts.",
+          "Daily reminders, guided Salah lessons, prayer times and beginner-friendly Islamic learning.",
       },
-      { property: "og:title", content: "Guided Path — A gentle path for new Muslims" },
+      {
+        property: "og:title",
+        content: "Guided Path — A gentle path for new Muslims",
+      },
       {
         property: "og:description",
         content:
-          "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts.",
+          "Daily reminders, guided Salah lessons, prayer times and beginner-friendly Islamic learning.",
       },
     ],
   }),
   component: Home,
 });
 
-// For Quran-type reminders, use Aladhan-companion Quran API to validate/refresh
-// the verse text. If it fails, we keep the curated text.
 async function refreshQuranText(reminder: Reminder): Promise<Reminder> {
-  if (reminder.type !== "Quran" || !reminder.quranRef) return reminder;
+  if (reminder.type !== "Quran" || !reminder.quranRef) {
+    return reminder;
+  }
+
   const { surah, ayah } = reminder.quranRef;
+
   try {
-    const res = await fetch(
+    const response = await fetch(
       `https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-uthmani`,
     );
-    if (!res.ok) return reminder;
-    const json = await res.json();
-    const arabic = json?.data?.text as string | undefined;
-    if (!arabic) return reminder;
-    return { ...reminder, arabic };
+
+    if (!response.ok) {
+      return reminder;
+    }
+
+    const result = await response.json();
+    const arabic = result?.data?.text as string | undefined;
+
+    if (!arabic) {
+      return reminder;
+    }
+
+    return {
+      ...reminder,
+      arabic,
+    };
   } catch {
     return reminder;
   }
 }
 
 function DailyReminderCard() {
-  const base = pickTodayReminder();
+  const baseReminder = pickTodayReminder();
+
   const { data } = useQuery({
     queryKey: [
       "daily-reminder",
       Math.floor(Date.now() / (1000 * 60 * 60 * 24)),
-      base.source,
+      baseReminder.source,
     ],
-    queryFn: () => refreshQuranText(base),
+    queryFn: () => refreshQuranText(baseReminder),
     staleTime: 1000 * 60 * 60 * 6,
     retry: 1,
   });
-  const reminder = data ?? base;
+
+  const reminder = data ?? baseReminder;
 
   return (
     <section className="animate-fade-up">
-      <div className="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-sand-200/60 space-y-5">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-600">
+      <div className="space-y-5 rounded-3xl border border-border/70 bg-card p-6 shadow-sm md:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
             Daily Reminder · ذكر اليوم
           </span>
-          <span className="text-[10px] uppercase tracking-widest font-semibold px-3 py-1 rounded-full bg-moss-800 text-stone-50">
+
+          <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary-foreground">
             {reminder.type}
           </span>
         </div>
 
         <p
           dir="rtl"
-          className="font-arabic text-2xl md:text-3xl text-right leading-loose text-moss-800"
+          className="font-arabic text-right text-2xl leading-loose text-foreground md:text-3xl"
         >
           {reminder.arabic}
         </p>
-        <blockquote className="font-serif text-xl md:text-2xl italic leading-snug text-moss-800 text-balance">
+
+        <blockquote className="text-balance font-serif text-xl italic leading-snug text-foreground md:text-2xl">
           &ldquo;{reminder.english}&rdquo;
         </blockquote>
-        <div className="text-xs text-moss-600/80 font-serif italic">
+
+        <p className="font-serif text-xs italic text-muted-foreground">
           — {reminder.source}
-        </div>
-        <p className="text-sm text-moss-800/90 leading-relaxed border-t border-sand-200/60 pt-4 text-pretty">
+        </p>
+
+        <p className="border-t border-border/70 pt-4 text-sm leading-relaxed text-foreground/85">
           {reminder.explanation}
         </p>
-        <div className="text-[10px] uppercase tracking-widest text-moss-600/60">
+
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
           Category · {reminder.category}
-        </div>
+        </p>
       </div>
     </section>
   );
@@ -103,119 +129,156 @@ function SalahDashboardCard() {
   const { percent, completedCount, total, nextLesson } = useSalahProgress();
   const { current } = useCurrentLesson();
   const { count: practiceCount } = usePracticeCount();
+
   const continueSlug = current ?? nextLesson.slug;
+
   const continueLesson =
-    SALAH_LESSONS.find((l) => l.slug === continueSlug) ?? nextLesson;
+    SALAH_LESSONS.find((lesson) => lesson.slug === continueSlug) ?? nextLesson;
 
   return (
-    <div className="bg-moss-800 text-stone-50 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl shadow-moss-800/10">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <section className="space-y-6 rounded-3xl bg-primary p-6 text-primary-foreground shadow-xl shadow-primary/10 md:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-[10px] uppercase tracking-widest text-gold-500 font-semibold">
-            Currently Learning
-          </div>
-          <h4 className="text-2xl md:text-3xl font-serif italic mt-1">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-accent">
+            Currently learning
+          </p>
+
+          <h2 className="mt-1 font-serif text-2xl italic md:text-3xl">
             The Salah Course
-          </h4>
-          <p className="text-stone-50/60 mt-1 text-sm max-w-sm">
+          </h2>
+
+          <p className="mt-2 max-w-sm text-sm text-primary-foreground/70">
             {completedCount} of {total} lessons complete · {practiceCount}{" "}
             practice sessions
           </p>
         </div>
+
         <div className="text-right">
-          <div className="text-[10px] uppercase tracking-widest text-gold-500">
+          <p className="text-[10px] uppercase tracking-widest text-accent">
             Progress
-          </div>
-          <div className="font-serif italic text-4xl">{percent}%</div>
+          </p>
+
+          <p className="font-serif text-4xl italic">{percent}%</p>
         </div>
       </div>
-      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+
+      <div
+        className="h-1.5 overflow-hidden rounded-full bg-primary-foreground/15"
+        role="progressbar"
+        aria-label="Salah course progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+      >
         <div
-          className="h-full bg-gold-500 transition-all"
+          className="h-full rounded-full bg-accent transition-all duration-500"
           style={{ width: `${percent}%` }}
         />
       </div>
-      <div className="grid sm:grid-cols-2 gap-3">
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <Link
           to="/salah/$slug"
           params={{ slug: continueLesson.slug }}
-          className="bg-stone-50 text-moss-800 rounded-2xl px-5 py-4 hover:bg-gold-500 hover:text-stone-50 transition-colors"
+          className="rounded-2xl bg-background px-5 py-4 text-foreground transition duration-200 hover:-translate-y-0.5 hover:bg-accent hover:text-accent-foreground"
         >
-          <div className="text-[10px] uppercase tracking-widest opacity-70">
+          <p className="text-[10px] uppercase tracking-widest opacity-70">
             Continue learning
-          </div>
-          <div className="font-serif italic text-lg mt-1 truncate">
+          </p>
+
+          <p className="mt-1 truncate font-serif text-lg italic">
             {continueLesson.titleEn}
-          </div>
+          </p>
         </Link>
+
         <Link
           to="/salah/practice"
-          className="bg-moss-600 text-stone-50 rounded-2xl px-5 py-4 hover:bg-gold-500 transition-colors"
+          className="rounded-2xl border border-primary-foreground/15 bg-primary-foreground/10 px-5 py-4 text-primary-foreground transition duration-200 hover:-translate-y-0.5 hover:bg-accent hover:text-accent-foreground"
         >
-          <div className="text-[10px] uppercase tracking-widest text-gold-500">
+          <p className="text-[10px] uppercase tracking-widest text-accent">
             Guided practice
-          </div>
-          <div className="font-serif italic text-lg mt-1">
+          </p>
+
+          <p className="mt-1 font-serif text-lg italic">
             Walk through a prayer
-          </div>
+          </p>
         </Link>
       </div>
-    </div>
+    </section>
   );
 }
 
 function ProgressCard() {
   const { completedCount, percent } = useSalahProgress();
+
   return (
-    <div className="bg-white border border-sand-200/60 rounded-3xl p-6 md:p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-sm font-semibold uppercase tracking-widest text-moss-800">
+    <section className="rounded-3xl border border-border/70 bg-card p-6 md:p-8">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-foreground">
           Your Journey
-        </h3>
-        <span className="text-[10px] font-arabic text-moss-600">تقدمك</span>
+        </h2>
+
+        <span className="font-arabic text-xs text-muted-foreground">
+          تقدمك
+        </span>
       </div>
+
       <div className="space-y-4">
         <div>
-          <div className="flex justify-between text-xs text-moss-600 mb-1">
+          <div className="mb-2 flex justify-between text-xs text-muted-foreground">
             <span>Salah course</span>
             <span>{completedCount} lessons</span>
           </div>
-          <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-label="Your Salah progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+          >
             <div
-              className="h-full bg-moss-600 transition-all"
+              className="h-full rounded-full bg-primary transition-all duration-500"
               style={{ width: `${percent}%` }}
             />
           </div>
         </div>
-        <p className="text-xs text-moss-600/80 leading-relaxed">
+
+        <p className="text-xs leading-relaxed text-muted-foreground">
           Small and steady beats big and rare. Every lesson you finish is a
           seed.
         </p>
       </div>
-    </div>
+    </section>
   );
 }
 
 function Home() {
   return (
-    <div className="min-h-screen bg-stone-50 text-moss-800 pb-20">
+    <div className="min-h-screen bg-background pb-20 text-foreground">
       <GuidedPathNav />
 
-      <main className="max-w-5xl mx-auto px-5 md:px-6 space-y-10">
+      <MosqueHero />
+
+      <main className="mx-auto max-w-5xl space-y-10 px-5 md:px-6">
+        <LearningPathGrid />
+
         <DailyReminderCard />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg md:text-xl font-medium tracking-tight text-moss-800">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="space-y-6 lg:col-span-2">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg font-medium tracking-tight text-foreground md:text-xl">
                 Your Learning Path{" "}
-                <span className="font-arabic text-moss-600 text-base">
+                <span className="font-arabic text-base text-muted-foreground">
                   · مسار التعلم
                 </span>
-              </h3>
+              </h2>
+
               <Link
                 to="/salah"
-                className="text-sm font-medium text-gold-600 underline underline-offset-4 hover:text-moss-800 transition-colors"
+                className="shrink-0 text-sm font-medium text-accent underline underline-offset-4 transition-colors hover:text-foreground"
               >
                 View course
               </Link>
@@ -230,12 +293,13 @@ function Home() {
           </div>
         </div>
 
-        <footer className="pt-10 border-t border-sand-200/60 text-center space-y-2">
-          <p className="font-serif italic text-moss-600 text-lg">
+        <footer className="space-y-2 border-t border-border/70 pt-10 text-center">
+          <p className="font-serif text-lg italic text-muted-foreground">
             &ldquo;The most beloved deeds to Allah are those done consistently,
             even if small.&rdquo;
           </p>
-          <p className="text-[11px] uppercase tracking-widest text-moss-600/60">
+
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground/70">
             Ṣaḥīḥ al-Bukhārī 6464
           </p>
         </footer>
