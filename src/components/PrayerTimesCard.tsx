@@ -6,21 +6,19 @@ export function PrayerTimesCard() {
   const { status, times, error, request, currentIndex } = usePrayerTimes();
 
   useEffect(() => {
-    // Auto-request only if user previously granted permission (best-effort)
-    if (
-      typeof navigator !== "undefined" &&
-      "permissions" in navigator &&
-      // @ts-expect-error non-standard but supported
-      navigator.permissions?.query
-    ) {
-      // @ts-expect-error same
-      navigator.permissions
-        .query({ name: "geolocation" })
-        .then((res: PermissionStatus) => {
-          if (res.state === "granted") request();
-        })
-        .catch(() => void 0);
-    }
+    if (typeof navigator === "undefined") return;
+    const perms = (navigator as Navigator & {
+      permissions?: {
+        query: (o: { name: PermissionName }) => Promise<PermissionStatus>;
+      };
+    }).permissions;
+    if (!perms?.query) return;
+    perms
+      .query({ name: "geolocation" as PermissionName })
+      .then((res) => {
+        if (res.state === "granted") request();
+      })
+      .catch(() => void 0);
   }, [request]);
 
   return (
