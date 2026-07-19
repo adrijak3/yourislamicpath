@@ -245,6 +245,7 @@ function SalahIndex() {
               </p>
             </Link>
           </div>
+          <Link to="/salah/movements" className="block rounded-2xl border border-primary-foreground/15 bg-primary-foreground/5 px-5 py-4 text-center text-sm font-semibold text-primary-foreground transition hover:bg-accent hover:text-accent-foreground">Open the visual movement guide →</Link>
         </section>
 
         {/* Course guidance */}
