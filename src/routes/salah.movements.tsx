@@ -1,1 +1,5 @@
-
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { GuidedPathNav } from "@/components/GuidedPathNav";
+import { MOVEMENTS, SalahMovementCard } from "@/components/SalahMovementCard";
+export const Route=createFileRoute("/salah/movements")({component:MovementGuide});
+function MovementGuide(){return <div className="min-h-screen bg-background text-foreground"><GuidedPathNav/><main className="mx-auto max-w-6xl space-y-8 px-5 pb-20"><div><Link to="/salah" className="text-sm text-muted-foreground">← Salah course</Link><p className="mt-7 text-xs uppercase tracking-[.2em] text-accent">Visual prayer guide</p><h1 className="mt-2 font-serif text-5xl italic">Salah movements</h1><p className="mt-3 max-w-2xl text-muted-foreground">Study each position slowly. The illustrations are simplified learning aids; follow a trusted teacher for detailed corrections.</p></div><div className="grid gap-6 md:grid-cols-2">{MOVEMENTS.map(name=><SalahMovementCard key={name} name={name}/>)}</div></main></div>}
