@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { GuidedPathNav } from "@/components/GuidedPathNav";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useNavigate,
+} from "@tanstack/react-router";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { GuidedPathNav } from "@/components/GuidedPathNav";
 import {
   LESSON_BY_SLUG,
   SALAH_LESSONS,
@@ -18,16 +23,23 @@ import {
 export const Route = createFileRoute("/salah/$slug")({
   loader: ({ params }) => {
     const lesson = LESSON_BY_SLUG[params.slug];
-    if (!lesson) throw notFound();
+
+    if (!lesson) {
+      throw notFound();
+    }
+
     return { lesson };
   },
+
   head: ({ loaderData }) => {
     const title = loaderData?.lesson
-      ? `${loaderData.lesson.titleEn} — Salah Course · Noor`
-      : "Lesson — Noor";
+      ? `${loaderData.lesson.titleEn} — Guided Path`
+      : "Salah lesson — Guided Path";
+
     const description =
       loaderData?.lesson?.summary ??
-      "A gentle Salah lesson for new Muslims and reverts.";
+      "A gentle, beginner-friendly Salah lesson for new Muslims.";
+
     return {
       meta: [
         { title },
@@ -37,22 +49,33 @@ export const Route = createFileRoute("/salah/$slug")({
       ],
     };
   },
+
   notFoundComponent: LessonNotFound,
   component: LessonPage,
 });
 
 function LessonNotFound() {
   return (
-    <div className="min-h-screen bg-stone-50 text-moss-800">
+    <div className="min-h-screen bg-background text-foreground">
       <GuidedPathNav />
-      <main className="max-w-xl mx-auto px-6 py-16 text-center space-y-4">
-        <h1 className="font-serif italic text-3xl">Lesson not found</h1>
-        <p className="text-moss-600">
-          Return to the course to pick a lesson.
+
+      <main className="mx-auto max-w-xl space-y-5 px-6 py-16 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+          Salah course
         </p>
+
+        <h1 className="font-serif text-4xl italic text-foreground">
+          Lesson not found
+        </h1>
+
+        <p className="text-muted-foreground">
+          This lesson could not be found. Return to the course and choose
+          another lesson.
+        </p>
+
         <Link
           to="/salah"
-          className="inline-block mt-2 px-5 py-2 rounded-full bg-moss-800 text-stone-50 text-sm"
+          className="inline-flex rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-accent hover:text-accent-foreground"
         >
           Back to course
         </Link>
@@ -71,24 +94,38 @@ function PhraseBlock({
   showTranslation: boolean;
 }) {
   return (
-    <div className="rounded-2xl bg-stone-50 border border-sand-200/70 p-5 md:p-6 space-y-3 text-center">
+    <div className="space-y-4 rounded-3xl border border-border/70 bg-card p-5 text-center shadow-sm md:p-7">
       {phrase.arabic && (
         <p
           dir="rtl"
-          className="font-arabic text-3xl md:text-4xl text-moss-800 leading-loose"
+          className="font-arabic text-3xl leading-loose text-card-foreground md:text-4xl"
         >
           {phrase.arabic}
         </p>
       )}
+
       {showTransliteration && phrase.transliteration && (
-        <p className="font-serif italic text-lg text-moss-600">
-          {phrase.transliteration}
-        </p>
+        <div className="rounded-2xl bg-secondary/70 px-4 py-3">
+          <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Transliteration
+          </p>
+
+          <p className="font-serif text-lg italic text-foreground md:text-xl">
+            {phrase.transliteration}
+          </p>
+        </div>
       )}
+
       {showTranslation && phrase.translation && (
-        <p className="text-sm text-moss-800/90 text-balance">
-          {phrase.translation}
-        </p>
+        <div className="rounded-2xl border border-border/70 bg-background px-4 py-3">
+          <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Meaning
+          </p>
+
+          <p className="text-sm leading-relaxed text-foreground/90">
+            {phrase.translation}
+          </p>
+        </div>
       )}
     </div>
   );
@@ -98,9 +135,12 @@ function LessonPage() {
   const { lesson } = Route.useLoaderData() as { lesson: Lesson };
   const navigate = useNavigate();
   const { prev, next } = neighborLessons(lesson.slug);
+
   const { isComplete, markComplete, toggle } = useCompletedLessons();
   const { setCurrent } = useCurrentLesson();
+
   const done = isComplete(lesson.slug);
+
   const {
     showTransliteration,
     setShowTransliteration,
@@ -109,94 +149,160 @@ function LessonPage() {
     guidance,
     setGuidance,
   } = useDisplayPrefs();
+
   const [whyOpen, setWhyOpen] = useState(false);
 
   useEffect(() => {
     setCurrent(lesson.slug);
     setWhyOpen(false);
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [lesson.slug, setCurrent]);
 
   const genderNotesToShow =
     lesson.genderNotes?.filter(
-      (n) => guidance === "both" || n.audience === guidance || n.audience === "both",
+      (note) =>
+        guidance === "both" ||
+        note.audience === guidance ||
+        note.audience === "both",
     ) ?? [];
 
+  const handleComplete = () => {
+    toggle(lesson.slug);
+
+    if (!done && next) {
+      window.setTimeout(() => {
+        navigate({
+          to: "/salah/$slug",
+          params: { slug: next.slug },
+        });
+      }, 150);
+
+      return;
+    }
+
+    if (!done) {
+      markComplete(lesson.slug);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-stone-50 text-moss-800 pb-32">
+    <div className="min-h-screen bg-background pb-32 text-foreground">
       <GuidedPathNav />
 
-      <main className="max-w-2xl mx-auto px-5 md:px-6 space-y-8">
+      <main className="mx-auto max-w-2xl space-y-8 px-5 md:px-6">
         {/* Breadcrumb */}
-        <div className="flex items-center justify-between text-xs text-moss-600/70">
-          <Link to="/salah" className="hover:text-gold-600 transition-colors">
+        <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
+          <Link
+            to="/salah"
+            className="transition-colors hover:text-accent"
+          >
             ← Course
           </Link>
+
           <span>
-            Lesson {lesson.index} / {SALAH_LESSONS.length}
+            Lesson {lesson.index} of {SALAH_LESSONS.length}
           </span>
         </div>
 
         {/* Lesson header */}
         <header className="space-y-3">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-gold-600 font-semibold">
-            {done ? "Completed" : "Now reading"}
+          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-accent">
+            {done ? "✓ Completed" : "Now learning"}
           </span>
-          <h1 className="font-serif italic text-3xl md:text-5xl text-moss-800 text-balance">
+
+          <h1 className="text-balance font-serif text-4xl italic leading-tight text-foreground md:text-5xl">
             {lesson.titleEn}
           </h1>
+
           {lesson.titleAr && (
             <p
               dir="rtl"
-              className="font-arabic text-2xl md:text-3xl text-moss-600"
+              className="font-arabic text-2xl leading-relaxed text-accent md:text-3xl"
             >
               {lesson.titleAr}
             </p>
           )}
+
           {lesson.transliteration && (
-            <p className="font-serif italic text-moss-600/80">
+            <p className="font-serif text-lg italic text-muted-foreground">
               {lesson.transliteration}
             </p>
           )}
+
+          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+            {lesson.summary}
+          </p>
         </header>
 
-        {/* Display prefs */}
-        <div className="flex flex-wrap gap-2">
-          <TogglePill
-            active={showTransliteration}
-            onClick={() => setShowTransliteration((v) => !v)}
-            label="Transliteration"
-          />
-          <TogglePill
-            active={showTranslation}
-            onClick={() => setShowTranslation((v) => !v)}
-            label="Translation"
-          />
-          <div className="ml-auto flex gap-1 bg-stone-100 rounded-full p-1">
-            {(["male", "female", "both"] as const).map((g) => (
-              <button
-                key={g}
-                type="button"
-                onClick={() => setGuidance(g)}
-                className={[
-                  "px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-semibold transition-colors",
-                  guidance === g
-                    ? "bg-moss-800 text-stone-50"
-                    : "text-moss-600 hover:text-moss-800",
-                ].join(" ")}
-              >
-                {g}
-              </button>
-            ))}
+        {/* Display preferences */}
+        <section className="rounded-3xl border border-border/70 bg-card p-4 shadow-sm">
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Lesson display
+            </p>
           </div>
-        </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <TogglePill
+              active={showTransliteration}
+              onClick={() => setShowTransliteration((value) => !value)}
+              label="Transliteration"
+            />
+
+            <TogglePill
+              active={showTranslation}
+              onClick={() => setShowTranslation((value) => !value)}
+              label="Translation"
+            />
+          </div>
+
+          <div className="mt-4 border-t border-border/70 pt-4">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Movement guidance
+            </p>
+
+            <div
+              className="inline-flex rounded-full border border-border bg-secondary/60 p-1"
+              role="group"
+              aria-label="Choose movement guidance"
+            >
+              {(["male", "female", "both"] as const).map((option) => {
+                const selected = guidance === option;
+
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setGuidance(option)}
+                    aria-pressed={selected}
+                    className={[
+                      "rounded-full px-3 py-2 text-[10px] font-semibold uppercase tracking-widest transition",
+                      selected
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-card hover:text-foreground",
+                    ].join(" ")}
+                  >
+                    {selected ? "✓ " : ""}
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
         {/* Explanation */}
-        <p className="text-moss-800/90 leading-relaxed text-[17px] text-pretty">
-          {lesson.explanation}
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+            What to do
+          </h2>
 
-        {/* Phrase */}
+          <p className="text-pretty text-[17px] leading-relaxed text-foreground/90">
+            {lesson.explanation}
+          </p>
+        </section>
+
+        {/* Main phrase */}
         {lesson.phrase && (
           <PhraseBlock
             phrase={lesson.phrase}
@@ -205,24 +311,42 @@ function LessonPage() {
           />
         )}
 
-        {/* Audio */}
+        {/* Audio placeholder */}
         {(lesson.phrase || lesson.audioLabel) && (
-          <div className="bg-white border border-sand-200/60 rounded-2xl p-4 md:p-5">
+          <section className="rounded-3xl border border-border/70 bg-card p-4 shadow-sm md:p-5">
+            <div className="mb-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Pronunciation
+              </p>
+            </div>
+
             <AudioPlayer label={lesson.audioLabel ?? "Listen"} />
-          </div>
+
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              Audio will play once a recording has been connected to this
+              lesson.
+            </p>
+          </section>
         )}
 
-        {/* Extra phrases (e.g. Fatiha verses) */}
+        {/* Additional phrases */}
         {lesson.extraPhrases && lesson.extraPhrases.length > 0 && (
-          <section className="space-y-3">
-            <h2 className="text-xs uppercase tracking-widest font-semibold text-moss-600">
-              Line by line
-            </h2>
-            <div className="space-y-3">
-              {lesson.extraPhrases.map((p, i) => (
+          <section className="space-y-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+                Line by line
+              </p>
+
+              <h2 className="mt-1 font-serif text-2xl italic text-foreground">
+                Learn it slowly
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {lesson.extraPhrases.map((phrase, index) => (
                 <PhraseBlock
-                  key={i}
-                  phrase={p}
+                  key={`${lesson.slug}-phrase-${index}`}
+                  phrase={phrase}
                   showTransliteration={showTransliteration}
                   showTranslation={showTranslation}
                 />
@@ -231,19 +355,30 @@ function LessonPage() {
           </section>
         )}
 
-        {/* Gender-specific notes */}
+        {/* Gender-specific guidance */}
         {genderNotesToShow.length > 0 && (
-          <section className="rounded-2xl bg-white border border-sand-200/60 p-5 space-y-3">
-            <h2 className="text-xs uppercase tracking-widest font-semibold text-moss-600">
-              Guidance notes
-            </h2>
-            <ul className="space-y-2 text-sm text-moss-800">
-              {genderNotesToShow.map((n, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="text-gold-600 text-[10px] uppercase tracking-widest font-semibold shrink-0 w-16 pt-1">
-                    {n.audience}
+          <section className="space-y-4 rounded-3xl border border-border/70 bg-card p-5 shadow-sm">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+                Movement guidance
+              </p>
+
+              <h2 className="mt-1 font-serif text-2xl italic text-card-foreground">
+                Position notes
+              </h2>
+            </div>
+
+            <ul className="space-y-3">
+              {genderNotesToShow.map((note, index) => (
+                <li
+                  key={`${note.audience}-${index}`}
+                  className="flex gap-3 rounded-2xl bg-secondary/60 p-4 text-sm leading-relaxed text-foreground"
+                >
+                  <span className="w-16 shrink-0 pt-0.5 text-[9px] font-semibold uppercase tracking-widest text-accent">
+                    {note.audience}
                   </span>
-                  <span className="text-pretty">{n.text}</span>
+
+                  <span className="text-pretty">{note.text}</span>
                 </li>
               ))}
             </ul>
@@ -252,38 +387,44 @@ function LessonPage() {
 
         {/* Scholarly note */}
         {lesson.scholarlyNote && (
-          <p className="text-xs text-moss-600/80 italic border-l-2 border-gold-500/60 pl-3 leading-relaxed">
-            {lesson.scholarlyNote}
-          </p>
+          <aside className="rounded-r-2xl border-l-2 border-accent bg-secondary/50 px-4 py-3">
+            <p className="text-xs italic leading-relaxed text-muted-foreground">
+              {lesson.scholarlyNote}
+            </p>
+          </aside>
         )}
 
-        {/* Why we do this — expandable */}
-        <section className="rounded-2xl bg-moss-800 text-stone-50 overflow-hidden">
+        {/* Why section */}
+        <section className="overflow-hidden rounded-3xl bg-primary text-primary-foreground shadow-lg shadow-primary/10">
           <button
             type="button"
-            onClick={() => setWhyOpen((v) => !v)}
+            onClick={() => setWhyOpen((value) => !value)}
             aria-expanded={whyOpen}
-            className="w-full flex items-center justify-between gap-4 p-5 text-left"
+            className="flex w-full items-center justify-between gap-4 p-5 text-left md:p-6"
           >
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-gold-500">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
                 Why we do this
-              </div>
-              <div className="font-serif italic text-xl mt-1">
+              </p>
+
+              <p className="mt-1 font-serif text-2xl italic">
                 A deeper reason
-              </div>
+              </p>
             </div>
+
             <span
+              aria-hidden="true"
               className={[
-                "text-2xl transition-transform",
+                "text-2xl transition-transform duration-200",
                 whyOpen ? "rotate-45" : "",
               ].join(" ")}
             >
               +
             </span>
           </button>
+
           {whyOpen && (
-            <div className="px-5 pb-6 -mt-1 text-stone-50/90 leading-relaxed text-pretty">
+            <div className="border-t border-primary-foreground/10 px-5 pb-6 pt-5 text-pretty leading-relaxed text-primary-foreground/85 md:px-6">
               {lesson.why}
             </div>
           )}
@@ -291,18 +432,31 @@ function LessonPage() {
 
         {/* Common mistakes */}
         {lesson.mistakes.length > 0 && (
-          <section className="space-y-3">
-            <h2 className="text-xs uppercase tracking-widest font-semibold text-moss-600">
-              Common mistakes
-            </h2>
-            <ul className="space-y-2">
-              {lesson.mistakes.map((m, i) => (
+          <section className="space-y-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+                Be careful of
+              </p>
+
+              <h2 className="mt-1 font-serif text-2xl italic text-foreground">
+                Common mistakes
+              </h2>
+            </div>
+
+            <ul className="space-y-3">
+              {lesson.mistakes.map((mistake, index) => (
                 <li
-                  key={i}
-                  className="flex gap-3 text-sm text-moss-800 bg-white border border-sand-200/60 rounded-xl p-4"
+                  key={`${lesson.slug}-mistake-${index}`}
+                  className="flex gap-3 rounded-2xl border border-border/70 bg-card p-4 text-sm leading-relaxed text-card-foreground shadow-sm"
                 >
-                  <span className="text-gold-600 shrink-0">•</span>
-                  <span className="text-pretty">{m}</span>
+                  <span
+                    className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary text-xs text-accent"
+                    aria-hidden="true"
+                  >
+                    •
+                  </span>
+
+                  <span className="text-pretty">{mistake}</span>
                 </li>
               ))}
             </ul>
@@ -310,55 +464,55 @@ function LessonPage() {
         )}
       </main>
 
-      {/* Sticky lesson controls */}
-      <div className="fixed bottom-0 inset-x-0 z-30 bg-stone-50/95 backdrop-blur border-t border-sand-200/70">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-2">
+      {/* Sticky controls */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-3">
           <button
             type="button"
             disabled={!prev}
-            onClick={() =>
-              prev &&
-              navigate({ to: "/salah/$slug", params: { slug: prev.slug } })
-            }
-            className="shrink-0 size-11 grid place-items-center rounded-full bg-white border border-sand-200 text-moss-800 disabled:opacity-30"
+            onClick={() => {
+              if (!prev) {
+                return;
+              }
+
+              navigate({
+                to: "/salah/$slug",
+                params: { slug: prev.slug },
+              });
+            }}
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-30"
             aria-label="Previous lesson"
           >
             ←
           </button>
+
           <button
             type="button"
-            onClick={() => {
-              toggle(lesson.slug);
-              if (!done && next) {
-                setTimeout(
-                  () =>
-                    navigate({
-                      to: "/salah/$slug",
-                      params: { slug: next.slug },
-                    }),
-                  120,
-                );
-              } else if (!done) {
-                markComplete(lesson.slug);
-              }
-            }}
+            onClick={handleComplete}
             className={[
-              "flex-1 rounded-full px-4 py-3 text-sm font-semibold transition-colors truncate",
+              "flex-1 truncate rounded-full px-4 py-3 text-sm font-semibold transition",
               done
-                ? "bg-white border border-moss-600 text-moss-600"
-                : "bg-moss-800 text-stone-50 hover:bg-gold-600",
+                ? "border border-primary bg-card text-primary hover:bg-secondary"
+                : "bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground",
             ].join(" ")}
           >
             {done ? "✓ Completed — tap to undo" : "Mark as complete"}
           </button>
+
           <button
             type="button"
             disabled={!next}
-            onClick={() =>
-              next &&
-              navigate({ to: "/salah/$slug", params: { slug: next.slug } })
-            }
-            className="shrink-0 size-11 grid place-items-center rounded-full bg-white border border-sand-200 text-moss-800 disabled:opacity-30"
+            onClick={() => {
+              if (!next) {
+                return;
+              }
+
+              navigate({
+                to: "/salah/$slug",
+                params: { slug: next.slug },
+              });
+            }}
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-30"
             aria-label="Next lesson"
           >
             →
@@ -384,13 +538,27 @@ function TogglePill({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        "px-3 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold transition-colors border",
+        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-widest transition",
         active
-          ? "bg-moss-800 text-stone-50 border-moss-800"
-          : "bg-white text-moss-600 border-sand-200 hover:border-gold-500",
+          ? "border-primary bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20 ring-offset-2 ring-offset-card"
+          : "border-border bg-background text-muted-foreground hover:border-accent hover:text-foreground",
       ].join(" ")}
     >
-      {label}
+      <span
+        className={[
+          "flex size-4 items-center justify-center rounded-full text-[9px]",
+          active
+            ? "bg-primary-foreground/20 text-primary-foreground"
+            : "border border-current",
+        ].join(" ")}
+        aria-hidden="true"
+      >
+        {active ? "✓" : ""}
+      </span>
+
+      <span>{label}</span>
+
+      <span className="opacity-70">{active ? "On" : "Off"}</span>
     </button>
   );
 }
