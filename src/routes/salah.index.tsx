@@ -1,4 +1,4 @@
-import { NoorNav } from "@/components/NoorNav";
+import { GuidedPathNav } from "@/components/GuidedPathNav";
 
 import { SALAH_LESSONS } from "@/lib/salah-course";
 import {
@@ -98,7 +98,7 @@ function SalahIndex() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-moss-800 pb-24">
-      <NoorNav />
+      <GuidedPathNav />
 
       <main className="max-w-3xl mx-auto px-5 md:px-6 space-y-10">
         {/* Hero */}
