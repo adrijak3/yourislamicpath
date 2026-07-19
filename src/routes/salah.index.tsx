@@ -12,13 +12,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/salah/")({
   head: () => ({
     meta: [
-      { title: "The Salah Course — Noor" },
+      { title: "The Salah Course — Guided Path" },
       {
         name: "description",
         content:
           "A gentle, complete Salah course for new Muslims and reverts — 20 lessons, guided practice, and a calm, mobile-first design.",
       },
-      { property: "og:title", content: "The Salah Course — Noor" },
+      { property: "og:title", content: "The Salah Course — Guided Path" },
       {
         property: "og:description",
         content:
