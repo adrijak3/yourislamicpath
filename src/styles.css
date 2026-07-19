@@ -89,6 +89,52 @@
   --input: #ded8c7;
   --ring: #c19a55;
 }
+:root[data-theme="midnight"] {
+  --background: #0d1714;
+  --foreground: #eef4ef;
+  --card: #14221d;
+  --card-foreground: #eef4ef;
+  --popover: #14221d;
+  --popover-foreground: #eef4ef;
+  --primary: #d7bc82;
+  --primary-foreground: #102c25;
+  --secondary: #1b3028;
+  --secondary-foreground: #eef4ef;
+  --muted: #172820;
+  --muted-foreground: #aec0b6;
+  --border: #294439;
+  --input: #294439;
+}
+
+:root[data-theme="sepia"] {
+  --background: #f4ecdf;
+  --foreground: #47382c;
+  --card: #fffaf0;
+  --card-foreground: #47382c;
+  --primary: #5f4935;
+  --primary-foreground: #fffaf0;
+  --secondary: #e7dac7;
+  --secondary-foreground: #47382c;
+  --muted: #eadfce;
+  --muted-foreground: #796858;
+  --border: #d4c3ad;
+  --input: #d4c3ad;
+}
+
+:root[data-theme="garden"] {
+  --background: #f0f6f0;
+  --foreground: #234637;
+  --card: #ffffff;
+  --card-foreground: #234637;
+  --primary: #285944;
+  --primary-foreground: #ffffff;
+  --secondary: #dcebdd;
+  --secondary-foreground: #234637;
+  --muted: #e8f2e8;
+  --muted-foreground: #607a69;
+  --border: #c8dbc9;
+  --input: #c8dbc9;
+}
 
 @layer base {
   * {
