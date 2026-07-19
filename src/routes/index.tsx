@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Learn to pray at your own pace, with beginner-friendly lessons, guided practice, and daily reminders.",
+          "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts.",
       },
     ],
   }),
