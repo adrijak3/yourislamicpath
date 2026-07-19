@@ -1,114 +1,188 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { usePrayerTimes } from "@/lib/prayer-times";
 
 export function PrayerTimesCard() {
   const { status, times, error, request, currentIndex } = usePrayerTimes();
 
+  /*
+   * Keep the newest version of request available without making the
+   * permission effect run again whenever the hook re-renders.
+   */
+  const requestRef = useRef(request);
+  const autoRequestStartedRef = useRef(false);
+
   useEffect(() => {
-    if (typeof navigator === "undefined") return;
-    const perms = (navigator as Navigator & {
-      permissions?: {
-        query: (o: { name: PermissionName }) => Promise<PermissionStatus>;
-      };
-    }).permissions;
-    if (!perms?.query) return;
-    perms
-      .query({ name: "geolocation" as PermissionName })
-      .then((res) => {
-        if (res.state === "granted") request();
-      })
-      .catch(() => void 0);
+    requestRef.current = request;
   }, [request]);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return;
+    }
+
+    /*
+     * React Strict Mode may run effects twice during development.
+     * This guard ensures location is still requested only once.
+     */
+    if (autoRequestStartedRef.current) {
+      return;
+    }
+
+    autoRequestStartedRef.current = true;
+
+    const permissions = navigator.permissions;
+
+    if (!permissions?.query) {
+      return;
+    }
+
+    let cancelled = false;
+
+    permissions
+      .query({
+        name: "geolocation" as PermissionName,
+      })
+      .then((permissionStatus) => {
+        if (cancelled) {
+          return;
+        }
+
+        /*
+         * Automatically load prayer times only when the user has already
+         * granted location permission. Otherwise, wait for the button click.
+         */
+        if (permissionStatus.state === "granted") {
+          requestRef.current();
+        }
+      })
+      .catch(() => {
+        /*
+         * Some browsers do not fully support the Permissions API.
+         * The manual location button will still work.
+         */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const locationIsLoading =
+    status === "locating" || status === "loading";
+
   return (
-    <div className="bg-sand-200/40 rounded-3xl p-6 md:p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-sm font-semibold uppercase tracking-widest text-moss-800">
+    <section className="rounded-3xl border border-border/70 bg-card p-6 shadow-sm md:p-8">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-card-foreground">
           Prayer Times
         </h3>
-        <span className="text-[10px] font-arabic text-moss-600">
+
+        <span
+          dir="rtl"
+          className="font-arabic text-xs text-muted-foreground"
+        >
           مواقيت الصلاة
         </span>
       </div>
 
       {status !== "ready" && (
         <div className="space-y-4">
-          <p className="text-sm text-moss-600 leading-relaxed">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             Share your location to see today’s prayer times for where you are.
           </p>
+
           <button
             type="button"
-            onClick={request}
-            className="w-full rounded-full bg-moss-800 text-stone-50 px-4 py-3 text-xs uppercase tracking-widest font-semibold hover:bg-gold-600 transition-colors disabled:opacity-60"
-            disabled={status === "locating" || status === "loading"}
+            onClick={() => request()}
+            disabled={locationIsLoading}
+            className="w-full rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-wait disabled:opacity-60"
           >
             {status === "locating"
               ? "Locating…"
               : status === "loading"
                 ? "Loading times…"
-                : "Use my location"}
+                : status === "error"
+                  ? "Try location again"
+                  : "Use my location"}
           </button>
+
           {status === "error" && error && (
-            <p className="text-xs text-moss-600/80">{error}</p>
+            <div
+              role="alert"
+              className="rounded-2xl border border-border bg-secondary/50 px-4 py-3"
+            >
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {error}
+              </p>
+            </div>
           )}
         </div>
       )}
 
       {status === "ready" && times && (
         <div className="space-y-3">
-          {times.map((p, i) => {
-            const isCurrent = i === currentIndex;
-            const isPast = i < currentIndex;
+          {times.map((prayer, index) => {
+            const isCurrent = index === currentIndex;
+            const isPast =
+              currentIndex >= 0 && index < currentIndex;
+
             return (
               <div
-                key={p.name}
+                key={`${prayer.name}-${prayer.time}`}
                 className={[
-                  "flex justify-between items-center rounded-xl px-4 py-3 transition-colors",
+                  "flex items-center justify-between gap-4 rounded-2xl px-4 py-3 transition-colors",
                   isCurrent
-                    ? "bg-white shadow-sm ring-1 ring-moss-800/5"
+                    ? "bg-secondary shadow-sm ring-1 ring-accent/20"
                     : isPast
                       ? "opacity-50"
-                      : "",
+                      : "bg-background/40",
                 ].join(" ")}
               >
-                <div className="flex flex-col">
+                <div className="flex min-w-0 flex-col">
                   <span
                     className={[
-                      "text-sm",
-                      isCurrent
-                        ? "font-semibold text-moss-800"
-                        : "text-moss-800",
+                      "text-sm text-foreground",
+                      isCurrent ? "font-semibold" : "",
                     ].join(" ")}
                   >
-                    {p.name}
+                    {prayer.name}
                   </span>
+
                   <span
+                    dir="rtl"
                     className={[
-                      "text-[10px] font-arabic",
-                      isCurrent ? "text-gold-600" : "text-moss-600/70",
+                      "font-arabic text-xs",
+                      isCurrent
+                        ? "text-accent"
+                        : "text-muted-foreground",
                     ].join(" ")}
                   >
-                    {p.ar}
+                    {prayer.ar}
                   </span>
                 </div>
+
                 <span
                   className={[
-                    "text-sm",
-                    isCurrent ? "font-bold text-gold-600" : "text-moss-600",
+                    "shrink-0 text-sm",
+                    isCurrent
+                      ? "font-bold text-accent"
+                      : "text-foreground",
                   ].join(" ")}
                 >
-                  {p.time}
+                  {prayer.time}
                 </span>
               </div>
             );
           })}
-          <p className="text-[11px] text-moss-600/70 leading-relaxed pt-1">
-            Times from Aladhan · Method: ISNA. They refresh when you reload.
+
+          <p className="pt-1 text-[11px] leading-relaxed text-muted-foreground">
+            Times provided by Aladhan using the ISNA calculation method.
+            Reload the page to refresh them.
           </p>
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
