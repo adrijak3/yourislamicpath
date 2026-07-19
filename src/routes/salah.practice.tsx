@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { NoorNav } from "@/components/NoorNav";
+import { GuidedPathNav } from "@/components/GuidedPathNav";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import {
   PRAYERS,
@@ -16,13 +16,13 @@ import {
 export const Route = createFileRoute("/salah/practice")({
   head: () => ({
     meta: [
-      { title: "Guided Prayer Practice — Noor" },
+      { title: "Guided Prayer Practice — Guided Path" },
       {
         name: "description",
         content:
           "Walk through any of the five daily prayers, one step at a time — with Arabic, transliteration, translation, and audio.",
       },
-      { property: "og:title", content: "Guided Prayer Practice — Noor" },
+      { property: "og:title", content: "Guided Prayer Practice — Guided Path" },
       {
         property: "og:description",
         content:
@@ -42,7 +42,7 @@ function Practice() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-moss-800 pb-32">
-      <NoorNav />
+      <GuidedPathNav />
 
       <main className="max-w-2xl mx-auto px-5 md:px-6 space-y-8">
         <div className="flex items-center justify-between text-xs text-moss-600/70">
