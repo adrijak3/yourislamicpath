@@ -94,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Noor — A gentle path for new Muslims" },
       { name: "twitter:description", content: "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca3d805f-3cec-48f7-a2b1-9390a19ff76e/id-preview-db3aa445--705daaa8-5bd2-4b62-bec4-1be3fda4b3a0.lovable.app-1784408048524.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca3d805f-3cec-48f7-a2b1-9390a19ff76e/id-preview-db3aa445--705daaa8-5bd2-4b62-bec4-1be3fda4b3a0.lovable.app-1784408048524.png" },
+      { property: "og:image", content: "https://thumbs.dreamstime.com/b/al-quran-16204929.jpg" },
+      { name: "twitter:image", content: "https://thumbs.dreamstime.com/b/al-quran-16204929.jpg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
