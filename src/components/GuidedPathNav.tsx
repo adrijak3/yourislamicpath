@@ -6,32 +6,62 @@ import {
   type AppTheme,
 } from "@/lib/theme";
 
-const themes: {
+type ThemeOption = {
   id: AppTheme;
   label: string;
-  className: string;
-}[] = [
+  swatchClassName: string;
+};
+
+const themes: ThemeOption[] = [
   {
     id: "light",
     label: "Light theme",
-    className: "bg-stone-50 ring-stone-300",
+    swatchClassName: "bg-[#fdfcf7]",
   },
   {
     id: "midnight",
     label: "Midnight theme",
-    className: "bg-zinc-900 ring-zinc-700",
+    swatchClassName: "bg-[#0d1714]",
   },
   {
     id: "sepia",
     label: "Sepia theme",
-    className: "bg-[#f4ece1] ring-[#d4c5b3]",
+    swatchClassName: "bg-[#f4ecdf]",
   },
   {
     id: "garden",
     label: "Garden theme",
-    className: "bg-[#e8f0eb] ring-[#c2d6cb]",
+    swatchClassName: "bg-[#dcebdd]",
   },
 ];
+
+const navigation = [
+  {
+    label: "Home",
+    to: "/",
+    exact: true,
+  },
+  {
+    label: "Salah",
+    to: "/salah",
+  },
+  {
+    label: "Quran",
+    to: "/quran",
+  },
+  {
+    label: "Duas",
+    to: "/duas",
+  },
+  {
+    label: "Sunnah",
+    to: "/sunnah",
+  },
+  {
+    label: "Arabic",
+    to: "/arabic",
+  },
+] as const;
 
 export function GuidedPathNav() {
   const [activeTheme, setActiveTheme] = useState<AppTheme>("light");
@@ -49,16 +79,20 @@ export function GuidedPathNav() {
   };
 
   return (
-    <>
+    <header className="bg-background text-foreground">
       {/* Utility bar */}
-      <div className="bg-secondary/50 border-b border-border px-6 py-2">
-        <div className="max-w-5xl mx-auto flex justify-between items-center gap-4 flex-wrap">
+      <div className="border-b border-border bg-secondary/50 px-4 py-2 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Theme
             </span>
 
-            <div className="flex gap-2">
+            <div
+              className="flex items-center gap-2"
+              role="group"
+              aria-label="Choose website theme"
+            >
               {themes.map((theme) => {
                 const isActive = activeTheme === theme.id;
 
@@ -66,15 +100,19 @@ export function GuidedPathNav() {
                   <button
                     key={theme.id}
                     type="button"
+                    title={theme.label}
                     aria-label={theme.label}
                     aria-pressed={isActive}
                     onClick={() => handleThemeChange(theme.id)}
                     className={[
-                      "size-4 rounded-full ring-1 ring-offset-2 ring-offset-background shadow-sm transition-all",
-                      theme.className,
+                      "size-5 rounded-full border border-border shadow-sm",
+                      "ring-offset-2 ring-offset-background",
+                      "transition duration-200",
+                      "hover:scale-110 hover:opacity-100",
+                      theme.swatchClassName,
                       isActive
-                        ? "scale-110 ring-2 ring-primary"
-                        : "opacity-60 hover:opacity-100 hover:scale-110",
+                        ? "scale-110 opacity-100 ring-2 ring-ring"
+                        : "opacity-65 ring-0",
                     ].join(" ")}
                   />
                 );
@@ -82,99 +120,117 @@ export function GuidedPathNav() {
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <button className="text-[10px] font-semibold uppercase tracking-widest text-accent">
+          <div
+            className="flex items-center gap-4"
+            aria-label="Language selection"
+          >
+            <button
+              type="button"
+              aria-pressed="true"
+              className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent"
+            >
               English
             </button>
 
-            <button className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors">
+            <button
+              type="button"
+              disabled
+              title="Arabic interface coming soon"
+              className="cursor-not-allowed text-[11px] font-semibold tracking-widest text-muted-foreground opacity-50"
+            >
               العربية
             </button>
           </div>
         </div>
       </div>
 
-      {/* Primary nav */}
-      <nav className="px-6 py-6 md:py-8 flex justify-between items-center max-w-5xl mx-auto gap-4">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-serif text-xl italic shadow-sm">
+      {/* Main navigation */}
+      <nav
+        className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6 md:py-7"
+        aria-label="Main navigation"
+      >
+        <Link
+          to="/"
+          aria-label="Guided Path home"
+          className="group flex shrink-0 items-center gap-3"
+        >
+          <div className="flex size-10 items-center justify-center rounded-full bg-primary font-serif text-xl italic text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
             G
           </div>
 
-          <span className="font-serif italic text-2xl tracking-tight text-foreground">
+          <span className="hidden font-serif text-2xl italic tracking-tight text-foreground sm:inline">
             Guided Path
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <Link
-            to="/"
-            className="hover:text-accent transition-colors"
-            activeProps={{ className: "text-foreground font-medium" }}
-            activeOptions={{ exact: true }}
-          >
-            Home
-          </Link>
-
-          <Link
-            to="/salah"
-            className="hover:text-accent transition-colors"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Salah
-          </Link>
-
-          <Link
-            to="/quran"
-            className="hover:text-accent transition-colors"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Quran
-          </Link>
-
-          <Link
-            to="/duas"
-            className="hover:text-accent transition-colors"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Duas
-          </Link>
-
-          <Link
-            to="/sunnah"
-            className="hover:text-accent transition-colors"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Sunnah
-          </Link>
-
-          <Link
-            to="/arabic"
-            className="hover:text-accent transition-colors"
-            activeProps={{ className: "text-foreground font-medium" }}
-          >
-            Arabic
-          </Link>
+        {/* Desktop navigation */}
+        <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex lg:gap-8">
+          {navigation.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              activeOptions={{
+                exact: item.exact ?? false,
+              }}
+              className="whitespace-nowrap transition-colors hover:text-accent"
+              activeProps={{
+                className:
+                  "whitespace-nowrap font-medium text-foreground transition-colors",
+                "aria-current": "page",
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
 
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="hidden sm:flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full">
-            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 lg:flex">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               7 day streak
             </span>
 
-            <div className="size-2 bg-accent rounded-full animate-pulse" />
+            <span
+              className="size-2 rounded-full bg-accent motion-safe:animate-pulse"
+              aria-hidden="true"
+            />
           </div>
 
           <Link
             to="/account"
-            aria-label="Open account"
-            className="size-10 rounded-full outline outline-1 outline-border flex items-center justify-center bg-card hover:bg-secondary transition-colors"
+            aria-label="Open your account"
+            title="Account"
+            className="flex size-10 items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <span className="text-xs font-semibold text-foreground">SA</span>
+            <span className="text-xs font-semibold text-card-foreground">
+              SA
+            </span>
           </Link>
         </div>
       </nav>
-    </>
+
+      {/* Mobile navigation */}
+      <div className="border-y border-border bg-background px-4 md:hidden">
+        <div className="no-scrollbar mx-auto flex max-w-6xl gap-6 overflow-x-auto py-3 text-sm text-muted-foreground">
+          {navigation.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              activeOptions={{
+                exact: item.exact ?? false,
+              }}
+              className="shrink-0 whitespace-nowrap transition-colors hover:text-accent"
+              activeProps={{
+                className:
+                  "shrink-0 whitespace-nowrap font-medium text-foreground",
+                "aria-current": "page",
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </header>
   );
 }
