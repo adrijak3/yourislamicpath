@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Noor — A gentle path for new Muslims" },
+      { title: "Guided Path — A gentle path for new Muslims" },
       {
         name: "description",
         content:
           "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts.",
       },
       { name: "theme-color", content: "#fcfaf7" },
-      { property: "og:title", content: "Noor — A gentle path for new Muslims" },
+      { property: "og:title", content: "Guided Path — A gentle path for new Muslims" },
       {
         property: "og:description",
         content:
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Noor — A gentle path for new Muslims" },
+      { name: "twitter:title", content: "Guided Path — A gentle path for new Muslims" },
       { name: "twitter:description", content: "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts." },
      { property: "og:image", content: "/images/guided-path-cover.webp" },
 { name: "twitter:image", content: "/images/guided-path-cover.webp" },
