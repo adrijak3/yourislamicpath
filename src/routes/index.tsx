@@ -4,6 +4,7 @@ import { GuidedPathNav } from "@/components/GuidedPathNav";
 import { PrayerTimesCard } from "@/components/PrayerTimesCard";
 import { SALAH_LESSONS } from "@/lib/salah-course";
 import { pickTodayReminder, type Reminder } from "@/lib/daily-reminders";
+import { MosqueHero } from "@/components/MosqueHero";
 import {
   usePracticeCount,
   useSalahProgress,
