@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { NoorNav } from "@/components/NoorNav";
+import { GuidedPathNav } from "@/components/GuidedPathNav";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import {
   LESSON_BY_SLUG,
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/salah/$slug")({
 function LessonNotFound() {
   return (
     <div className="min-h-screen bg-stone-50 text-moss-800">
-      <NoorNav />
+      <GuidedPathNav />
       <main className="max-w-xl mx-auto px-6 py-16 text-center space-y-4">
         <h1 className="font-serif italic text-3xl">Lesson not found</h1>
         <p className="text-moss-600">
@@ -124,7 +124,7 @@ function LessonPage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-moss-800 pb-32">
-      <NoorNav />
+      <GuidedPathNav />
 
       <main className="max-w-2xl mx-auto px-5 md:px-6 space-y-8">
         {/* Breadcrumb */}
