@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useLocalAuth, useStreak } from "@/lib/app-state";
 import {
   applyTheme,
   getSavedTheme,
@@ -65,6 +66,8 @@ const navigation = [
 
 export function GuidedPathNav() {
   const [activeTheme, setActiveTheme] = useState<AppTheme>("light");
+  const streak = useStreak();
+  const { user } = useLocalAuth();
 
   useEffect(() => {
     const savedTheme = getSavedTheme();
@@ -187,7 +190,7 @@ export function GuidedPathNav() {
         <div className="flex shrink-0 items-center gap-3">
           <div className="hidden items-center gap-2 rounded-full bg-secondary px-3 py-1.5 lg:flex">
             <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              7 day streak
+              {streak} day streak
             </span>
 
             <span
@@ -203,7 +206,7 @@ export function GuidedPathNav() {
             className="flex size-10 items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <span className="text-xs font-semibold text-card-foreground">
-              SA
+              {user ? user.name.slice(0, 2).toUpperCase() : "GP"}
             </span>
           </Link>
         </div>
