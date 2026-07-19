@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SalahIndexRouteImport } from './routes/salah.index'
+import { Route as SalahPracticeRouteImport } from './routes/salah.practice'
+import { Route as SalahSlugRouteImport } from './routes/salah.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalahIndexRoute = SalahIndexRouteImport.update({
+  id: '/salah/',
+  path: '/salah/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalahPracticeRoute = SalahPracticeRouteImport.update({
+  id: '/salah/practice',
+  path: '/salah/practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalahSlugRoute = SalahSlugRouteImport.update({
+  id: '/salah/$slug',
+  path: '/salah/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/salah/$slug': typeof SalahSlugRoute
+  '/salah/practice': typeof SalahPracticeRoute
+  '/salah/': typeof SalahIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/salah/$slug': typeof SalahSlugRoute
+  '/salah/practice': typeof SalahPracticeRoute
+  '/salah': typeof SalahIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/salah/$slug': typeof SalahSlugRoute
+  '/salah/practice': typeof SalahPracticeRoute
+  '/salah/': typeof SalahIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/salah/$slug' | '/salah/practice' | '/salah/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/salah/$slug' | '/salah/practice' | '/salah'
+  id: '__root__' | '/' | '/salah/$slug' | '/salah/practice' | '/salah/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SalahSlugRoute: typeof SalahSlugRoute
+  SalahPracticeRoute: typeof SalahPracticeRoute
+  SalahIndexRoute: typeof SalahIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/salah/': {
+      id: '/salah/'
+      path: '/salah'
+      fullPath: '/salah/'
+      preLoaderRoute: typeof SalahIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salah/practice': {
+      id: '/salah/practice'
+      path: '/salah/practice'
+      fullPath: '/salah/practice'
+      preLoaderRoute: typeof SalahPracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salah/$slug': {
+      id: '/salah/$slug'
+      path: '/salah/$slug'
+      fullPath: '/salah/$slug'
+      preLoaderRoute: typeof SalahSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SalahSlugRoute: SalahSlugRoute,
+  SalahPracticeRoute: SalahPracticeRoute,
+  SalahIndexRoute: SalahIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

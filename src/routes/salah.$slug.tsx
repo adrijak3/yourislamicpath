@@ -95,7 +95,7 @@ function PhraseBlock({
 }
 
 function LessonPage() {
-  const { lesson } = Route.useLoaderData();
+  const { lesson } = Route.useLoaderData() as { lesson: Lesson };
   const navigate = useNavigate();
   const { prev, next } = neighborLessons(lesson.slug);
   const { isComplete, markComplete, toggle } = useCompletedLessons();
