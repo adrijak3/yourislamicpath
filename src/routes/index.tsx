@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { NoorNav } from "@/components/NoorNav";
+import { GuidedPathNav } from "@/components/GuidedPathNav";
 import { PrayerTimesCard } from "@/components/PrayerTimesCard";
 import { SALAH_LESSONS } from "@/lib/salah-course";
 import { pickTodayReminder, type Reminder } from "@/lib/daily-reminders";
@@ -13,13 +13,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Noor — A gentle path for new Muslims" },
+      { title: "Guided Path — A gentle path for new Muslims" },
       {
         name: "description",
         content:
           "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts.",
       },
-      { property: "og:title", content: "Noor — A gentle path for new Muslims" },
+      { property: "og:title", content: "Guided Path — A gentle path for new Muslims" },
       {
         property: "og:description",
         content:
@@ -198,7 +198,7 @@ function ProgressCard() {
 function Home() {
   return (
     <div className="min-h-screen bg-stone-50 text-moss-800 pb-20">
-      <NoorNav />
+      <GuidedPathNav />
 
       <main className="max-w-5xl mx-auto px-5 md:px-6 space-y-10">
         <DailyReminderCard />
