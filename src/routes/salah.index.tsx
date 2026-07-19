@@ -1,5 +1,5 @@
 import { NoorNav } from "@/components/NoorNav";
-import { AudioPlayer } from "@/components/AudioPlayer";
+
 import { SALAH_LESSONS } from "@/lib/salah-course";
 import {
   useCompletedLessons,
