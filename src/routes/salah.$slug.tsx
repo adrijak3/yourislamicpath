@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Sparkles, X } from "lucide-react";
 import {
   createFileRoute,
   Link,
@@ -151,6 +152,7 @@ function LessonPage() {
   } = useDisplayPrefs();
 
   const [whyOpen, setWhyOpen] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     setCurrent(lesson.slug);
@@ -167,22 +169,24 @@ function LessonPage() {
     ) ?? [];
 
   const handleComplete = () => {
-    toggle(lesson.slug);
+    if (done) {
+      toggle(lesson.slug);
+      return;
+    }
 
-    if (!done && next) {
+    markComplete(lesson.slug);
+
+    if (next) {
       window.setTimeout(() => {
         navigate({
           to: "/salah/$slug",
           params: { slug: next.slug },
         });
       }, 150);
-
       return;
     }
 
-    if (!done) {
-      markComplete(lesson.slug);
-    }
+    setShowCelebration(true);
   };
 
   return (
@@ -463,6 +467,16 @@ function LessonPage() {
           </section>
         )}
       </main>
+
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-5 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="course-complete-title">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-accent/30 bg-card p-8 text-center shadow-2xl md:p-10">
+            <button type="button" onClick={() => setShowCelebration(false)} className="absolute right-5 top-5 grid size-9 place-items-center rounded-full border border-border" aria-label="Close celebration"><X className="size-4" /></button>
+            <div className="pointer-events-none absolute inset-0 opacity-30" aria-hidden="true">{Array.from({ length: 18 }).map((_, i) => <span key={i} className="absolute text-accent motion-safe:animate-pulse" style={{ left: `${(i * 37) % 100}%`, top: `${(i * 53) % 85}%`, animationDelay: `${i * 80}ms` }}>✦</span>)}</div>
+            <div className="relative"><div className="mx-auto grid size-20 place-items-center rounded-full bg-primary text-primary-foreground"><Sparkles className="size-9" /></div><p className="mt-6 text-xs font-semibold uppercase tracking-[0.22em] text-accent">Course completed</p><h2 id="course-complete-title" className="mt-2 font-serif text-5xl italic text-foreground">JazākAllāhu khayran</h2><p dir="rtl" className="mt-3 font-arabic text-2xl text-accent">جَزَاكَ اللَّهُ خَيْرًا</p><p className="mx-auto mt-5 max-w-md leading-relaxed text-muted-foreground">May Allah reward you, accept your sincere effort, increase you in beneficial knowledge, and keep you steadfast in every prayer. Āmīn.</p><div className="mt-7 grid gap-3 sm:grid-cols-2"><Link to="/salah" className="rounded-full border border-border px-5 py-3 text-sm font-semibold">Review the course</Link><Link to="/salah/practice" className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">Practise a prayer</Link></div></div>
+          </div>
+        </div>
+      )}
 
       {/* Sticky controls */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur">
