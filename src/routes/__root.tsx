@@ -94,12 +94,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Noor — A gentle path for new Muslims" },
       { name: "twitter:description", content: "Daily reminders, guided Salah lessons, and prayer times — a calm home for beginners and reverts." },
-      { property: "og:image", content: "https://thumbs.dreamstime.com/b/al-quran-16204929.jpg" },
-      { name: "twitter:image", content: "https://thumbs.dreamstime.com/b/al-quran-16204929.jpg" },
+     { property: "og:image", content: "/images/guided-path-cover.webp" },
+{ name: "twitter:image", content: "/images/guided-path-cover.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
