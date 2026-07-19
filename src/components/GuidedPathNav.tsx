@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-export function NoorNav() {
+export function GuidedPathNav() {
   return (
     <>
       {/* Utility bar */}
@@ -47,7 +47,7 @@ export function NoorNav() {
             N
           </div>
           <span className="font-serif italic text-2xl tracking-tight text-moss-800">
-            Noor
+            Guided Path
           </span>
         </Link>
 
