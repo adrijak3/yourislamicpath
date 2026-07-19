@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, MoonStar } from "lucide-react";
 import { useEffect, useState } from "react";
+import { LearningPathGrid } from "@/components/LearningPathGrid";
 
 export function MosqueHero() {
   const [offset, setOffset] = useState(0);
